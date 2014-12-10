@@ -4,6 +4,20 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+// Database
+var mongo = require('mongoskin');
+var db = mongo.db("mongodb://localhost:27017/rest_tut", {native_parser:true});
+// inserted dummy data by doing:
+// $ mkdir data && mongod --dbpath ./data
+// new shell:
+// $ mongo
+// $ use rest_tut
+// $ db.userlist.insert(
+    // {
+    //'username' : 'test1','email' : 'test1@test.com','fullname' : 'Bob Smith',
+    //'age' : 27,'location' : 'San Francisco','gender' : 'Male'})
+// $ db.userlist.find().pretty()
+// should now show newly entered record
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -21,6 +35,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Make our db accessible to our router
+app.use(function(req,res,next){
+    req.db = db;
+    next();
+});
 
 app.use('/', routes);
 app.use('/users', users);
